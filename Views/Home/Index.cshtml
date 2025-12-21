@@ -2,7 +2,179 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container my-4">
+    <div class="row g-4">
+        <aside class="col-lg-3">
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">
+                    文章分類
+                </div>
+                <ul class="list-group list-group-flush">
+
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="#">全部</a>
+                        <span class="badge bg-secondary rounded-pill">123</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="#">學習分享</a>
+                        <span class="badge bg-secondary rounded-pill">45</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="#">遊戲討論</a>
+                        <span class="badge bg-secondary rounded-pill">30</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="#">日常生活</a>
+                        <span class="badge bg-secondary rounded-pill">48</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header fw-semibold">
+                    管理區
+                </div>
+                <div class="card-body">
+                    <a href="/Admin/Posts" class="btn btn-sm btn-outline-danger w-100 mb-2">
+                        管理文章 / 刪文
+                    </a>
+                    <a href="/Admin/Categories" class="btn btn-sm btn-outline-secondary w-100">
+                        管理分類
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">文章列表</h2>
+                <a href="/Posts/Create" class="btn btn-success">
+                    新增文章
+                </a>
+            </div>
+
+
+            <article class="card mb-3">
+                <div class="card-body">
+                    <h3 class="h5 card-title mb-1">
+                        <a href="/Posts/Details/1" class="text-decoration-none">
+                            {{文章標題}}
+                        </a>
+                    </h3>
+                    <div class="small text-muted mb-2">
+                        作者：{{作者名稱}}  ｜ 發布時間： ｜ 分類：
+                    </div>
+                    <p class="card-text">
+
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="small text-muted">
+                            回覆數： ｜ 瀏覽：
+                        </div>
+                        <a href="/Posts/Details/1" class="btn btn-sm btn-outline-primary">
+                            查看詳細
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card mb-3">
+                <div class="card-body">
+                    <h3 class="h5 card-title mb-1">
+                        <a href="/Posts/Details/2" class="text-decoration-none">
+                            {{文章標題}}
+                        </a>
+                    </h3>
+                    <div class="small text-muted mb-2">
+                        作者： ｜ 發布時間： ｜ 分類：
+                    </div>
+                    <p class="card-text">
+
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="small text-muted">
+                            回覆數： ｜ 瀏覽：
+                        </div>
+                        <a href="/Posts/Details/2" class="btn btn-sm btn-outline-primary">
+                            查看詳細
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <nav aria-label="文章分頁">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <span class="page-link">上一頁</span>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link">1</span>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="?page=2">2</a></li>
+                    <li class="page-item"><a class="page-link" href="?page=3">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=2">下一頁</a>
+                    </li>
+                </ul>
+            </nav>
+        </main>
+    </div>
+</div>
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" method="post" action="/Account/Login">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">會員登入</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="loginEmail" class="form-label">帳號 / Email</label>
+                    <input type="text" class="form-control" id="loginEmail" name="Email">
+                </div>
+                <div class="mb-3">
+                    <label for="loginPassword" class="form-label">密碼</label>
+                    <input type="password" class="form-control" id="loginPassword" name="Password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-primary">登入</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" method="post" action="/Account/Register">
+            <div class="modal-header">
+                <h5 class="modal-title" id="registerModalLabel">註冊新帳號</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="registerName" class="form-label">暱稱</label>
+                    <input type="text" class="form-control" id="registerName" name="UserName">
+                </div>
+                <div class="mb-3">
+                    <label for="registerEmail" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="registerEmail" name="Email">
+                </div>
+                <div class="mb-3">
+                    <label for="registerPassword" class="form-label">密碼</label>
+                    <input type="password" class="form-control" id="registerPassword" name="Password">
+                </div>
+                <div class="mb-3">
+                    <label for="registerConfirmPassword" class="form-label">確認密碼</label>
+                    <input type="password" class="form-control" id="registerConfirmPassword" name="ConfirmPassword">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-success">註冊</button>
+            </div>
+        </form>
+    </div>
 </div>
