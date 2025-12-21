@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using WebProject.Models;
 
 namespace WebProject.Controllers
@@ -12,10 +13,12 @@ namespace WebProject.Controllers
     public class PostsController : Controller
     {
         private readonly WebProjectContext _context;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public PostsController(WebProjectContext context)
+        public PostsController(WebProjectContext context, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
+            _hostEnvironment = hostEnvironment;
         }
 
         // GET: Posts
@@ -48,7 +51,8 @@ namespace WebProject.Controllers
         // GET: Posts/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId");
+            var categories = _context.Categories.ToList();
+            ViewBag.CategoryList = new SelectList(categories, "CategoryId", "Description");
             ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId");
             return View();
         }
@@ -58,17 +62,56 @@ namespace WebProject.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PostId,Title,Content,UserId,CategoryId,CreatedAt,UpdatedAt,ViewCount,IsDeleted,ThumbnailUrl")] Post post)
+        public async Task<IActionResult> Create(PostCreateViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(post);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // 表單驗證失敗：重新載入分類下拉選單並回傳同一視圖，以顯示驗證錯誤
+                var categories = _context.Categories.ToList();
+                ViewBag.CategoryList = new SelectList(categories, "CategoryId", "Description", model.CategoryId);
+                return View(model);
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", post.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", post.UserId);
-            return View(post);
+
+            // 驗證成功：建立 Post 實體並設定各屬性
+            var post = new Post
+            {
+                Title = model.Title,
+                Content = model.Content,
+                CategoryId = model.CategoryId,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,       // 記得設定 UpdatedAt 为当前時間
+                UserId = 1                      // 暫時將作者 UserId 設為 1
+            };
+
+            // 處理圖片上傳
+            if (model.Thumbnail != null && model.Thumbnail.Length > 0)
+            {
+                // 確保上傳目錄存在，若無則建立 /wwwroot/uploads
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+                // 產生不重複的檔名，保留原始副檔名
+                string fileExt = Path.GetExtension(model.Thumbnail.FileName);
+                string fileName = Guid.NewGuid().ToString() + fileExt;
+                string filePath = Path.Combine(uploadsFolder, fileName);
+
+                // 將檔案保存到伺服器路徑
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.Thumbnail.CopyToAsync(stream);
+                }
+
+                // 將圖片的完整網站 URL 存入資料庫（例如：https://your-domain/uploads/xxx.jpg）
+                string fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+                post.ThumbnailUrl = fileUrl;
+            }
+
+            // 將新文章儲存至資料庫，並導向 Index 列表頁面
+            _context.Posts.Add(post);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Posts/Edit/5
