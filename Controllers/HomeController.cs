@@ -1,21 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using WebProject.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebProject.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly WebProjectContext _context;
+        public HomeController(ILogger<HomeController> logger, WebProjectContext context)
         {
+            _context = context;
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var posts = await _context.Posts
+                                      .Include(p => p.User)
+                                      .Include(p => p.Category)
+                                      .OrderByDescending(p => p.CreatedAt)
+                                      .ToListAsync();
+            return View(posts);
         }
 
         public IActionResult Privacy()

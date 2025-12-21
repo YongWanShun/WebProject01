@@ -1,4 +1,5 @@
-﻿@{
+﻿@model List<WebProject.Models.Post>
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -10,23 +11,15 @@
                     文章分類
                 </div>
                 <ul class="list-group list-group-flush">
-
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="#">全部</a>
-                        <span class="badge bg-secondary rounded-pill">123</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="#">學習分享</a>
-                        <span class="badge bg-secondary rounded-pill">45</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="#">遊戲討論</a>
-                        <span class="badge bg-secondary rounded-pill">30</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="#">日常生活</a>
-                        <span class="badge bg-secondary rounded-pill">48</span>
-                    </li>
+                @foreach (var category in Model)
+                {
+                    
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="#">@category.Category?.Name</a>
+                            <span class="badge bg-secondary rounded-pill">123</span>
+                        </li>
+                       
+                }     
                 </ul>
             </div>
 
@@ -53,54 +46,33 @@
                 </a>
             </div>
 
-
-            <article class="card mb-3">
-                <div class="card-body">
-                    <h3 class="h5 card-title mb-1">
-                        <a href="/Posts/Details/1" class="text-decoration-none">
-                            {{文章標題}}
-                        </a>
-                    </h3>
-                    <div class="small text-muted mb-2">
-                        作者：{{作者名稱}}  ｜ 發布時間： ｜ 分類：
-                    </div>
-                    <p class="card-text">
-
-                    </p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="small text-muted">
-                            回覆數： ｜ 瀏覽：
+            @foreach (var post in Model)
+            {
+                <article class="card mb-3">
+                    <div class="card-body">
+                        <h3 class="h5 card-title mb-1">
+                            <a href="/Posts/Details/@post.PostId" class="text-decoration-none">
+                                @post.Title
+                            </a>
+                        </h3>
+                        <div class="small text-muted mb-2">
+                            作者：@(post.User?.Username ?? "未知") ｜ 發布時間：@post.CreatedAt?.ToString("yyyy-MM-dd HH:mm") ｜ 分類：@post.Category?.Name
                         </div>
-                        <a href="/Posts/Details/1" class="btn btn-sm btn-outline-primary">
-                            查看詳細
-                        </a>
-                    </div>
-                </div>
-            </article>
+                        <p class="card-text">
 
-            <article class="card mb-3">
-                <div class="card-body">
-                    <h3 class="h5 card-title mb-1">
-                        <a href="/Posts/Details/2" class="text-decoration-none">
-                            {{文章標題}}
-                        </a>
-                    </h3>
-                    <div class="small text-muted mb-2">
-                        作者： ｜ 發布時間： ｜ 分類：
-                    </div>
-                    <p class="card-text">
-
-                    </p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="small text-muted">
-                            回覆數： ｜ 瀏覽：
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="small text-muted">
+                                回覆數： ｜ 瀏覽：@post.ViewCount
+                            </div>
+                            <a href="/Posts/Details/1" class="btn btn-sm btn-outline-primary">
+                                查看詳細
+                            </a>
                         </div>
-                        <a href="/Posts/Details/2" class="btn btn-sm btn-outline-primary">
-                            查看詳細
-                        </a>
                     </div>
-                </div>
-            </article>
+                </article>
+            }
+            
 
             <nav aria-label="文章分頁">
                 <ul class="pagination justify-content-center">
