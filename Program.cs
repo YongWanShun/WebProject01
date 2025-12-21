@@ -9,6 +9,8 @@ namespace WebProject
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddDbContext<Models.WebProjectContext>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
