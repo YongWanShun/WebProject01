@@ -37,18 +37,28 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Comments" asp-action="Index">評論</a>
                         </li>
+
                     </ul>
+                    
                     <ul class="navbar-nav mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <button class="btn btn-dark me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
-                                登入
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">
-                                註冊
-                            </button>
-                        </li>
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-link text-dark" asp-controller="Users" asp-action="Logout">登出</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                    登入
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-warning" asp-controller="Users" asp-action="Create">註冊</a>
+                            </li>
+                        }
+                        
                     </ul>
                 </div>
             </div>
@@ -59,6 +69,33 @@
             @RenderBody()
         </main>
     </div>
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" method="post" asp-action="Login" asp-controller="Account">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">會員登入</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">帳號 / Email</label>
+                        <input  type="text" class="form-control" id="loginEmail" name="Email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">密碼</label>
+                        <input type="password" class="form-control" id="loginPassword" name="Password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">登入</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
 
     <footer class="border-top footer text-muted">
         <div class="container">

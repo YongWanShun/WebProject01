@@ -1,0 +1,35 @@
+﻿@model List<WebProject.Models.Category>
+
+<div class="card mb-3">
+    <div class="card-header fw-semibold">
+        文章分類
+    </div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+            <a href="/" class="text-decoration-none text-dark">全部文章</a>
+        </li>
+        @foreach (var category in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a asp-controller="Home" asp-action="Index" asp-route-categoryId="@category.CategoryId" class="text-decoration-none text-dark">
+                    @category.Name
+                </a>
+                <span class="badge bg-secondary rounded-pill">@category.Posts.Count</span>
+            </li>
+        }
+    </ul>
+</div>
+@* <div class="card mb-3">
+    
+    <ul class="list-group list-group-flush">
+        @foreach (var category in Model)
+        {
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="#">@category.Name</a>
+                <span class="badge bg-secondary rounded-pill">123</span>
+            </li>
+
+        }
+    </ul>
+</div>  *@
