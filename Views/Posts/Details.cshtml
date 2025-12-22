@@ -29,6 +29,64 @@
         @Html.Raw(Model.Content?.Replace("\n", "<br />"))
     </div>
 
+    <!-- 評論區 -->
+    <div class="comments-section mt-5">
+        <h4 class="mb-4">
+            <i class="bi bi-chat-dots"></i> 評論區 (@(Model.Comments?.Count ?? 0))
+        </h4>
+
+        @if (Model.Comments != null && Model.Comments.Any())
+        {
+            <div class="vstack gap-3">
+                @foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+                {
+                    <div class="card border-0 shadow-sm bg-light">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0 text-primary">
+                                    @comment.User?.Username
+                                </h6>
+                                <small class="text-muted">
+                                    @comment.CreatedAt?.ToString("yyyy-MM-dd HH:mm")
+                                </small>
+                            </div>
+                            <p class="card-text mb-0">
+                                @Html.Raw(comment.Content?.Replace("\n", "<br />"))
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-secondary text-center" role="alert">
+                目前還沒有評論，快來搶頭香吧！
+            </div>
+        }
+
+        <div class="card mt-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                發表你的看法
+            </div>
+            <div class="card-body">
+                <form asp-controller="Post" asp-action="AddComment" method="post">
+                    <input type="hidden" name="PostId" value="@Model" />
+
+                    <div class="mb-3">
+                        <textarea name="Content" class="form-control" rows="3" placeholder="請輸入留言內容..." required></textarea>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            送出評論
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="mt-4">
         <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">返回文章列表</a>
     </div>

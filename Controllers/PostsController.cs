@@ -39,6 +39,7 @@ namespace WebProject.Controllers
             var post = await _context.Posts
                 .Include(p => p.Category)
                 .Include(p => p.User)
+                .Include(p => p.Comments)
                 .FirstOrDefaultAsync(m => m.PostId == id);
             if (post == null)
             {
