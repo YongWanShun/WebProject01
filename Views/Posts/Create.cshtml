@@ -2,38 +2,48 @@
 @{
     ViewData["Title"] = "發表新文章";
 }
-<h2>發表新文章</h2>
 
-<form asp-action="Create" method="post" enctype="multipart/form-data">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+@if (User.Identity.IsAuthenticated)
+{
+    <h2>發表新文章</h2>
 
-    <div class="form-group">
-        <label asp-for="Title" class="control-label"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
-    </div>
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="form-group">
-        <label asp-for="Content" class="control-label"></label>
-        <!-- 使用 textarea 讓內容可以輸入多行文字 -->
-        <textarea asp-for="Content" class="form-control" rows="5"></textarea>
-        <span asp-validation-for="Content" class="text-danger"></span>
-    </div>
+        <div class="form-group">
+            <label asp-for="Title" class="control-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="CategoryId" class="control-label"></label>
-        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryList"></select>
-        <span asp-validation-for="CategoryId" class="text-danger"></span>
-    </div>
+        <div class="form-group">
+            <label asp-for="Content" class="control-label"></label>
+            <!-- 使用 textarea 讓內容可以輸入多行文字 -->
+            <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Thumbnail" class="control-label">上傳縮圖</label>
-        <input asp-for="Thumbnail" type="file" class="form-control" />
-        <span asp-validation-for="Thumbnail" class="text-danger"></span>
-    </div>
+        <div class="form-group">
+            <label asp-for="CategoryId" class="control-label"></label>
+            <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryList"></select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
 
-    <button type="submit" class="btn btn-primary">發表文章</button>
-</form>
+        <div class="form-group">
+            <label asp-for="Thumbnail" class="control-label">上傳縮圖</label>
+            <input asp-for="Thumbnail" type="file" class="form-control" />
+            <span asp-validation-for="Thumbnail" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">發表文章</button>
+    </form>
+}
+else
+{
+    <p>請先 <a asp-controller="Users" asp-action="Login" data-bs-target=" #loginModal" data-bs-toggle="modal">登入</a> 才能參與討論。</p>
+}
+
+
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
