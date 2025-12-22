@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using WebProject.Models;
 
 namespace WebProject.Controllers
@@ -152,5 +155,58 @@ namespace WebProject.Controllers
         {
             return _context.Users.Any(e => e.UserId == id);
         }
+
+
+        // GET: 顯示登入頁面
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: Users/Login (處理 Modal 傳來的登入請求)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string account, string password) // 這裡直接接參數，比較簡單
+        {
+            // 1. 去資料庫找人 (比對 Username 或 Email)
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => (u.Username == account || u.Email == account) && u.Password == password);
+
+            if (user == null)
+            {
+                // 登入失敗：回傳一段 JS 讓前端跳 Alert (因為我們是在 Modal 裡，這樣處理最快)
+                return Content("<script>alert('帳號或密碼錯誤'); window.location.href='/';</script>", "text/html");
+            }
+
+            // 2. 【關鍵】建立身分證 (Claims)
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                
+                // ★ 這裡決定權限！對應資料庫的 Role 欄位 (admin / user)
+                new Claim(ClaimTypes.Role, user.Role ?? "user"),
+
+                new Claim("UserId", user.UserId.ToString()) // 存 ID 方便以後留言用
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties { IsPersistent = true };
+
+            // 3. 發送 Cookie (登入成功)
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+
+            // 4. 重新整理頁面 (或是導回首頁)
+            // Request.Headers["Referer"] 可以讓使用者回到原本所在的頁面
+            string referer = Request.Headers["Referer"].ToString();
+            return Redirect(string.IsNullOrEmpty(referer) ? "/" : referer);
+        }
+
+        // GET: Users/Logout
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 }

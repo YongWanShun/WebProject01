@@ -1,0 +1,27 @@
+﻿<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" method="post" asp-controller="Users" asp-action="Login">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="loginModalLabel">會員登入</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="loginAccount" class="form-label">帳號 / Email</label>
+                    <input type="text" class="form-control" id="loginAccount" name="account" required placeholder="請輸入帳號">
+                </div>
+                <div class="mb-3">
+                    <label for="loginPassword" class="form-label">密碼</label>
+                    <input type="password" class="form-control" id="loginPassword" name="password" required placeholder="請輸入密碼">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-primary">登入</button>
+            </div>
+            <div class="modal-footer justify-content-center bg-light">
+                <small>還沒有帳號？ <a asp-controller="Users" asp-action="Create">立即註冊</a></small>
+            </div>
+        </form>
+    </div>
+</div>

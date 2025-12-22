@@ -38,9 +38,44 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Comments" asp-action="Index">評論</a>
                         </li>
 
+                        @if (User.IsInRole("admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold" asp-controller="Users" asp-action="Index">
+                                    <i class="bi bi-gear-fill"></i> 用戶管理 (Admin)
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-dark">
+                                    Hi, <strong>@User.Identity.Name</strong>
+                                    (@(User.IsInRole("admin") ? "管理員" : "會員"))
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-link text-dark" asp-controller="Users" asp-action="Logout">登出</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                    登入
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary" asp-controller="Users" asp-action="Create">註冊</a>
+                            </li>
+                        }
                     </ul>
                     
-                    <ul class="navbar-nav mb-2 mb-lg-0">
+                    @* <ul class="navbar-nav mb-2 mb-lg-0">
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
@@ -59,7 +94,7 @@
                             </li>
                         }
                         
-                    </ul>
+                    </ul> *@
                 </div>
             </div>
         </nav>
@@ -69,7 +104,7 @@
             @RenderBody()
         </main>
     </div>
-    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
+    @* <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
          aria-hidden="true">
         <div class="modal-dialog">
             <form class="modal-content" method="post" asp-action="Login" asp-controller="Account">
@@ -93,9 +128,9 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> *@
 
-
+    <partial name="_LoginModal" />
 
     <footer class="border-top footer text-muted">
         <div class="container">
