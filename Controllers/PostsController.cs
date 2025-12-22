@@ -40,6 +40,7 @@ namespace WebProject.Controllers
                 .Include(p => p.Category)
                 .Include(p => p.User)
                 .Include(p => p.Comments)
+                .ThenInclude(c => c.User) // 順便抓留言者資料
                 .FirstOrDefaultAsync(m => m.PostId == id);
             if (post == null)
             {

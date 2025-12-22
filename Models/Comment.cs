@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebProject.Models;
 
@@ -19,6 +20,7 @@ public partial class Comment
 
     public bool? IsDeleted { get; set; }
 
+    [InverseProperty("Parent")]
     public virtual ICollection<Comment> InverseParent { get; set; } = new List<Comment>();
 
     public virtual Comment? Parent { get; set; }

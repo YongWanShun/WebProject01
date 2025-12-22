@@ -31,59 +31,114 @@
 
     <!-- 評論區 -->
     <div class="comments-section mt-5">
-        <h4 class="mb-4">
-            <i class="bi bi-chat-dots"></i> 評論區 (@(Model.Comments?.Count ?? 0))
-        </h4>
+        <h4 class="mb-4">評論區 (@(Model.Comments?.Count ?? 0))</h4>
 
         @if (Model.Comments != null && Model.Comments.Any())
         {
-            <div class="vstack gap-3">
-                @foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
-                {
-                    <div class="card border-0 shadow-sm bg-light">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="fw-bold mb-0 text-primary">
-                                    @comment.User?.Username
-                                </h6>
-                                <small class="text-muted">
-                                    @comment.CreatedAt?.ToString("yyyy-MM-dd HH:mm")
-                                </small>
-                            </div>
-                            <p class="card-text mb-0">
-                                @Html.Raw(comment.Content?.Replace("\n", "<br />"))
-                            </p>
+            @foreach (var comment in Model.Comments.Where(c => c.ParentId == null).OrderByDescending(c => c.CreatedAt))
+            {
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                            @comment.User?.Username?.Substring(0, 1).ToUpper()
                         </div>
                     </div>
-                }
-            </div>
+
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold">
+                            @comment.User?.Username
+                            <span class="text-muted fw-normal small ms-2">@comment.CreatedAt?.ToString("yyyy-MM-dd HH:mm")</span>
+                        </div>
+
+                        <div class="mt-1">
+                            @Html.Raw(comment.Content?.Replace("\n", "<br />"))
+                        </div>
+
+                        <div class="mt-1">
+                            <button class="btn btn-sm btn-link text-decoration-none ps-0 text-muted" onclick="toggleReplyInput('@comment.CommentId')">
+                                回覆
+                            </button>
+                        </div>
+
+                        <div id="reply-input-@comment.CommentId" class="mt-2" style="display:none;">
+                            <form asp-action="AddComment" method="post">
+                                <input type="hidden" name="PostId" value="@Model.PostId" />
+                                <input type="hidden" name="ParentId" value="@comment.CommentId" />
+                                <div class="d-flex">
+                                    <input name="Content" class="form-control form-control-sm me-2" placeholder="新增回覆..." required />
+                                    <button type="submit" class="btn btn-sm btn-primary">留言</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="toggleReplyInput('@comment.CommentId')">取消</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        @if (comment.InverseParent != null && comment.InverseParent.Any())
+                        {
+                            var replyCount = comment.InverseParent.Count;
+
+                            <div class="mt-1">
+                                <button class="btn btn-sm text-primary fw-bold text-decoration-none ps-0"
+                                        onclick="toggleSubComments('sub-comments-@comment.CommentId', this, @replyCount)">
+                                    <i class="bi bi-caret-down-fill"></i> @replyCount 條回覆
+                                </button>
+                            </div>
+
+                            <div id="sub-comments-@comment.CommentId" style="display:none;">
+                                @foreach (var reply in comment.InverseParent.OrderBy(r => r.CreatedAt))
+                                {
+                                    <div class="d-flex mt-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="rounded-circle bg-light text-secondary d-flex justify-content-center align-items-center border" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                                @reply.User?.Username?.Substring(0, 1).ToUpper()
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <div class="fw-bold small">
+                                                @reply.User?.Username
+                                                <span class="text-muted fw-normal small ms-2">@reply.CreatedAt?.ToString("yyyy-MM-dd HH:mm")</span>
+                                            </div>
+                                            <div class="small mt-1">
+                                                @Html.Raw(reply.Content?.Replace("\n", "<br />"))
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         }
         else
         {
-            <div class="alert alert-secondary text-center" role="alert">
-                目前還沒有評論，快來搶頭香吧！
-            </div>
+            <div class="alert alert-light text-center">還沒有人留言，來搶頭香吧！</div>
         }
 
-        <div class="card mt-4 border-primary">
-            <div class="card-header bg-primary text-white">
-                發表你的看法
-            </div>
-            <div class="card-body">
-                <form asp-controller="Post" asp-action="AddComment" method="post">
+        <div class="mt-4">
+            <h5>發表留言</h5>
+            @* @if (User.Identity.IsAuthenticated) *@
+            {
+                <form asp-action="AddComment" method="post">
                     <input type="hidden" name="PostId" value="@Model.PostId" />
-
-                    <div class="mb-3">
-                        <textarea name="Content" class="form-control" rows="3" placeholder="請輸入留言內容..." required></textarea>
-                    </div>
-
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">
-                            送出評論
-                        </button>
+                    <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                @* @User.Identity.Name.Substring(0, 1).ToUpper() *@
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <textarea name="Content" class="form-control mb-2" rows="1" placeholder="新增留言..." required></textarea>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary btn-sm">留言</button>
+                            </div>
+                        </div>
                     </div>
                 </form>
-            </div>
+            }
+            else
+            {
+                <p>請先 <a asp-controller="Account" asp-action="Login">登入</a> 才能參與討論。</p>
+            }
         </div>
     </div>
 
@@ -92,3 +147,32 @@
     </div>
 
 </div>
+
+
+@section Scripts {
+    <script>
+        // 控制「回覆輸入框」的開關
+        function toggleReplyInput(id) {
+            var box = document.getElementById('reply-input-' + id);
+            if (box.style.display === 'none') box.style.display = 'block';
+            else box.style.display = 'none';
+        }
+
+        // 控制「查看回覆」的開關 (YouTube 風格)
+        function toggleSubComments(elementId, btn, count) {
+            var container = document.getElementById(elementId);
+
+            if (container.style.display === 'none') {
+                // 展開
+                container.style.display = 'block';
+                // 按鈕變成「隱藏回覆」
+                btn.innerHTML = '<i class="bi bi-caret-up-fill"></i> 隱藏回覆';
+            } else {
+                // 收起
+                container.style.display = 'none';
+                // 按鈕變回「查看 X 條回覆」
+                btn.innerHTML = '<i class="bi bi-caret-down-fill"></i> ' + count + ' 條回覆';
+            }
+        }
+    </script>
+}
