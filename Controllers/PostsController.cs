@@ -210,5 +210,48 @@ namespace WebProject.Controllers
         {
             return _context.Posts.Any(e => e.PostId == id);
         }
+
+        // ==========================================
+        // 2. 新增 AddComment：處理留言提交
+        // ==========================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(int PostId, string Contents)
+        {
+            // A. 檢查是否登入
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Users"); // 或是跳出 Alert
+            }
+
+            // B. 取得目前登入者的 ID
+            var userIdStr = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login", "Users");
+            int userId = int.Parse(userIdStr);
+
+            // C. 檢查帳號是否被停用 (配合您上一個功能的邏輯)
+            // 這裡需要多查一次 DB 確保安全，或是您可以選擇信任 Cookie 裡的資訊
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null || user.IsActive == false)
+            {
+                return Content("<script>alert('您的帳號已被停用，無法留言。'); window.location.href='/';</script>", "text/html; charset=utf-8");
+            }
+
+            // D. 建立留言
+            var comment = new Comment
+            {
+                PostId = PostId,
+                UserId = userId,
+                Content = Contents,
+                CreatedAt = DateTime.Now,
+                IsDeleted = false
+            };
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+
+            // E. 完成後，導回該文章的詳情頁，讓使用者看到自己的留言
+            return RedirectToAction("Details", new { id = PostId });
+        }
     }
 }

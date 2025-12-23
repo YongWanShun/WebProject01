@@ -175,7 +175,12 @@ namespace WebProject.Controllers
             if (user == null)
             {
                 // 登入失敗：回傳一段 JS 讓前端跳 Alert (因為我們是在 Modal 裡，這樣處理最快)
-                return Content("<script>alert('帳號或密碼錯誤'); window.location.href='/';</script>", "text/html");
+                return Content("<script>alert('賬戶/密碼錯誤'); window.location.href='/';</script>", "text/html;charset=utf-8");
+            }
+
+            if (user.IsActive == false)
+            {
+                return Content("<script>alert('此帳號已被停用，無法登入。'); window.location.href='/';</script>", "text/html ;charset=utf-8");
             }
 
             // 2. 【關鍵】建立身分證 (Claims)
@@ -208,5 +213,23 @@ namespace WebProject.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        public async Task<IActionResult> ToggleActive(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // 切換狀態：如果是 true 變 false，如果是 false 變 true
+            // 注意：因為 IsActive 是 bool? (Nullable)，我們用 GetGetValueOrDefault() 來處理
+            bool currentStatus = user.IsActive.GetValueOrDefault(true);
+            user.IsActive = !currentStatus;
+
+            await _context.SaveChangesAsync();
+
+            // 切換完後，導回列表頁
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

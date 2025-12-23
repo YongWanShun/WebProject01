@@ -61,18 +61,22 @@
                                 回覆
                             </button>
                         </div>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <div id="reply-input-@comment.CommentId" class="mt-2" style="display:none;">
+                                <form asp-action="AddComment" method="post">
+                                    <input type="hidden" name="PostId" value="@Model.PostId" />
+                                    <input type="hidden" name="ParentId" value="@comment.CommentId" />
+                                    <div class="d-flex">
+                                        <input name="Contents" class="form-control form-control-sm me-2" placeholder="新增回覆..." required />
+                                        <button type="submit" class="btn btn-sm btn-primary">留言</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="toggleReplyInput('@comment.CommentId')">取消</button>
+                                    </div>
+                                </form>
+                            </div>
+                        }
+                        
 
-                        <div id="reply-input-@comment.CommentId" class="mt-2" style="display:none;">
-                            <form asp-action="AddComment" method="post">
-                                <input type="hidden" name="PostId" value="@Model.PostId" />
-                                <input type="hidden" name="ParentId" value="@comment.CommentId" />
-                                <div class="d-flex">
-                                    <input name="Content" class="form-control form-control-sm me-2" placeholder="新增回覆..." required />
-                                    <button type="submit" class="btn btn-sm btn-primary">留言</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="toggleReplyInput('@comment.CommentId')">取消</button>
-                                </div>
-                            </form>
-                        </div>
 
                         @if (comment.InverseParent != null && comment.InverseParent.Any())
                         {
@@ -129,7 +133,7 @@
                             </div>
                         </div>
                         <div class="flex-grow-1">
-                            <textarea name="Content" class="form-control mb-2" rows="1" placeholder="新增留言..." required></textarea>
+                            <textarea name="Contents" class="form-control mb-2" rows="1" placeholder="新增留言..." required></textarea>
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary btn-sm">留言</button>
                             </div>
