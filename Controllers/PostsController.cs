@@ -26,6 +26,11 @@ namespace WebProject.Controllers
         // GET: Posts
         public async Task<IActionResult> Index()
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
             var userIdStr = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userIdStr))
             {

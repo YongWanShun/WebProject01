@@ -7,19 +7,19 @@
 <h2>會員登入</h2>
 
 <div class="row">
-    <form class="modal-content" method="post" action="/Account/Login">
+    <form class="modal-content" method="post" asp-controller="Users" asp-action="Login">
         <div class="modal-header">
             <h5 class="modal-title" id="loginModalLabel">會員登入</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
         </div>
         <div class="modal-body">
             <div class="mb-3">
-                <label for="loginEmail" class="form-label">帳號 / Email</label>
-                <input type="text" class="form-control" id="loginEmail" name="Email">
+                <label for="loginAccount" class="form-label">帳號 / Email</label>
+                <input type="text" class="form-control" id="loginAccount" name="account" required placeholder="請輸入帳號">
             </div>
             <div class="mb-3">
                 <label for="loginPassword" class="form-label">密碼</label>
-                <input type="password" class="form-control" id="loginPassword" name="Password">
+                <input type="password" class="form-control" id="loginPassword" name="password" required placeholder="請輸入密碼">
             </div>
         </div>
         <div class="modal-footer">
