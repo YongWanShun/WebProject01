@@ -102,6 +102,14 @@ namespace WebProject.Controllers
                 return View(model);
             }
 
+            var userIdStr = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                // 沒有登入就不允許發文，你可以改成導向登入頁 / 顯示訊息
+                return RedirectToAction("Login", "Users");
+            }
+            int userId = int.Parse(userIdStr);
+
             // 驗證成功：建立 Post 實體並設定各屬性
             var post = new Post
             {
@@ -110,7 +118,7 @@ namespace WebProject.Controllers
                 CategoryId = model.CategoryId,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,       // 記得設定 UpdatedAt 为当前時間
-                UserId = 1                      // 暫時將作者 UserId 設為 1
+                UserId = userId
             };
 
             // 處理圖片上傳
