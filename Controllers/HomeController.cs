@@ -95,6 +95,7 @@ namespace WebProject.Controllers
             var query = _context.Posts
                                 .Include(p => p.User)
                                 .Include(p => p.Category)
+                                .Include(p => p.Comments)
                                 .AsQueryable();
 
             //  【新增】搜尋邏輯 (標題 或 內容 包含關鍵字)

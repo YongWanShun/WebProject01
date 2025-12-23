@@ -14,6 +14,7 @@ namespace WebProject.Controllers
     {
         private readonly WebProjectContext _context;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private static readonly TimeSpan ViewCountProtectionWindow = TimeSpan.FromMinutes(1);
 
         public PostsController(WebProjectContext context, IWebHostEnvironment hostEnvironment)
         {
@@ -45,6 +46,32 @@ namespace WebProject.Controllers
             if (post == null)
             {
                 return NotFound();
+            }
+
+            var cookieKey = "ViewedPosts"; // Cookie 名稱
+            Request.Cookies.TryGetValue(cookieKey, out string viewedPostsCookie);
+
+            var viewedIds = new HashSet<string>(
+                (viewedPostsCookie ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            );
+
+            string currentId = id.Value.ToString();
+            if (!viewedIds.Contains(currentId))
+            {
+                // 第一次在這個瀏覽器看這篇文章，瀏覽數 +1
+                post.ViewCount = (post.ViewCount ?? 0) + 1;
+                await _context.SaveChangesAsync();
+
+                // 把這篇文章 ID 記錄到 Cookie
+                viewedIds.Add(currentId);
+                var newCookieValue = string.Join(",", viewedIds);
+
+                Response.Cookies.Append(cookieKey, newCookieValue, new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.Add(ViewCountProtectionWindow),
+                    HttpOnly = true
+                });
             }
 
             return View(post);

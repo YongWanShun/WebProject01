@@ -89,7 +89,7 @@
                         </p>
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="small text-muted">
-                                回覆數： ｜ 瀏覽：@post.ViewCount
+                                回覆數：@post.Comments.Count(c => c.IsDeleted != true) ｜ 瀏覽：@post.ViewCount
                             </div>
                             <a href="/Posts/Details/@post.PostId" class="btn btn-sm btn-outline-primary">
                                 查看詳細
