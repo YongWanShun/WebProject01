@@ -96,6 +96,7 @@ namespace WebProject.Controllers
                                 .Include(p => p.User)
                                 .Include(p => p.Category)
                                 .Include(p => p.Comments)
+                                .Include(p => p.Likes)
                                 .AsQueryable();
 
             //  【新增】搜尋邏輯 (標題 或 內容 包含關鍵字)

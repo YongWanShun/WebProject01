@@ -41,7 +41,8 @@ namespace WebProject.Controllers
                 .Include(p => p.Category)
                 .Include(p => p.User)
                 .Include(p => p.Comments)
-                .ThenInclude(c => c.User) // 順便抓留言者資料
+                    .ThenInclude(c => c.User) // 順便抓留言者資料
+                .Include(p => p.Likes)
                 .FirstOrDefaultAsync(m => m.PostId == id);
             if (post == null)
             {
@@ -280,6 +281,49 @@ namespace WebProject.Controllers
 
             // E. 完成後，導回該文章的詳情頁，讓使用者看到自己的留言
             return RedirectToAction("Details", new { id = PostId });
+        }
+
+        // 2. 新增 ToggleLike 方法 (處理按讚)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLike(int id)
+        {
+            // A. 檢查是否登入
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            // B. 取得目前使用者 ID
+            var userIdStr = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login", "Users");
+            int userId = int.Parse(userIdStr);
+
+            // C. 檢查這個人有沒有按過這篇文章的讚
+            var existingLike = await _context.Likes
+                .FirstOrDefaultAsync(l => l.PostId == id && l.UserId == userId);
+
+            if (existingLike != null)
+            {
+                // 如果按過了 -> 取消讚 (刪除紀錄)
+                _context.Likes.Remove(existingLike);
+            }
+            else
+            {
+                // 如果沒按過 -> 按讚 (新增紀錄)
+                var like = new Like
+                {
+                    PostId = id,
+                    UserId = userId,
+                    CreatedAt = DateTime.Now
+                };
+                _context.Likes.Add(like);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // D. 導回文章頁面 (顯示最新的讚數)
+            return RedirectToAction("Details", new { id = id });
         }
     }
 }

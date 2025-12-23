@@ -22,11 +22,60 @@
             發布時間：
             @(Model.CreatedAt?.ToString("yyyy-MM-dd HH:mm") ?? "")
         </span>
+        <span class="mx-2">|</span>
+        <span>
+            點贊：
+            @(Model.Likes.Count)
+        </span>
     </div>
 
     <!-- 文章內容 -->
     <div class="post-content">
-        @Html.Raw(Model.Content?.Replace("\n", "<br />"))
+        @(Model.Content != null ? Html.Raw(Model.Content.Replace("\n", "<br />")) : "")
+    </div>
+
+    <div class="mt-4 mb-4">
+        @{
+            // 1. 計算總讚數
+            int likeCount = Model.Likes != null ? Model.Likes.Count : 0;
+
+            // 2. 判斷目前登入的使用者是否按過讚
+            bool isLiked = false;
+            if (User.Identity.IsAuthenticated)
+            {
+                var userIdStr = User.FindFirst("UserId") != null ? User.FindFirst("UserId").Value : null;
+                if (!string.IsNullOrEmpty(userIdStr))
+                {
+                    int userId = int.Parse(userIdStr);
+                    // 檢查 Likes 列表中是否有自己的 ID
+                    isLiked = Model.Likes != null && Model.Likes.Any(l => l.UserId == userId);
+                }
+            }
+        }
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <form asp-action="ToggleLike" asp-route-id="@Model.PostId" method="post">
+                @if (isLiked)
+                {
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-heart-fill"></i> 已按讚 (@likeCount)
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-heart"></i> 給個讚 (@likeCount)
+                    </button>
+                }
+            </form>
+        }
+        else
+        {
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#loginModal">
+                <i class="bi bi-heart"></i> 給個讚 (@likeCount)
+            </button>
+        }
     </div>
 
 
