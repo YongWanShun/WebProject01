@@ -1,14 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using WebProject.Models;
 
 namespace WebProject.Controllers
 {
+    [Authorize]
     public class CommentsController : Controller
     {
         private readonly WebProjectContext _context;
@@ -19,8 +21,21 @@ namespace WebProject.Controllers
         }
 
         // GET: Comments
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Index()
         {
+            // 驗證：檢查使用者是否登入
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            // 驗證：檢查使用者是否為管理員
+            if (!User.IsInRole("admin"))
+            {
+                return Content("<script>alert('權限不足，只有管理員可以查看所有留言！'); window.location.href='/';</script>", "text/html; charset=utf-8");
+            }
+
             var webProjectContext = _context.Comments.Include(c => c.Parent).Include(c => c.Post).Include(c => c.User);
             return View(await webProjectContext.ToListAsync());
         }

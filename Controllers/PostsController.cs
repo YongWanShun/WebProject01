@@ -42,7 +42,8 @@ namespace WebProject.Controllers
 
             IQueryable<Post> query = _context.Posts
             .Include(p => p.Category)
-            .Include(p => p.User);
+            .Include(p => p.User)
+            .Include(p => p.Comments);
 
             if (!isAdmin)
             {
