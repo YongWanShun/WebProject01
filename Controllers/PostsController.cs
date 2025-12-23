@@ -216,7 +216,7 @@ namespace WebProject.Controllers
         // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(int PostId, string Contents)
+        public async Task<IActionResult> AddComment(int PostId, string Contents, int? ParentId)
         {
             // A. 檢查是否登入
             if (!User.Identity.IsAuthenticated)
@@ -242,6 +242,7 @@ namespace WebProject.Controllers
             {
                 PostId = PostId,
                 UserId = userId,
+                ParentId = ParentId,
                 Content = Contents,
                 CreatedAt = DateTime.Now,
                 IsDeleted = false
