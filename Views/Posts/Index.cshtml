@@ -1,83 +1,52 @@
 ﻿@model IEnumerable<WebProject.Models.Post>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "管理文章";
 }
 
-<h1>Index</h1>
+<h1>文章列表</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">新增文章</a>
 </p>
-<table class="table">
+
+<table class="table table-striped table-hover">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Content)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ViewCount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDeleted)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ThumbnailUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th></th>
+            <th>標題</th>
+            <th>作者</th>
+            <th>分類</th>
+            <th>發布時間</th>
+            <th>瀏覽數</th>
+            <th>回覆數</th>
+            <th>管理功能</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Content)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ViewCount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsDeleted)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ThumbnailUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.CategoryId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.UserId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.PostId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PostId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PostId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                <td>@(item.User?.Username ?? "未知")</td>
+                <td>
+                    @if (item.Category != null)
+                    {
+                        <span class="badge bg-secondary">@item.Category.Name</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">無分類</span>
+                    }
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.CreatedAt)</td>
+                <td>@Html.DisplayFor(modelItem => item.ViewCount)</td>
+                <td>@(item.Comments != null ? item.Comments.Count(c => c.IsDeleted != true) : 0)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.PostId">編輯</a> |
+                    <a asp-action="Details" asp-route-id="@item.PostId">詳情</a> |
+                    <a asp-action="Delete" asp-route-id="@item.PostId">刪除</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

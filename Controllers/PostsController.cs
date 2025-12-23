@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using WebProject.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebProject.Controllers
 {
@@ -25,8 +26,26 @@ namespace WebProject.Controllers
         // GET: Posts
         public async Task<IActionResult> Index()
         {
-            var webProjectContext = _context.Posts.Include(p => p.Category).Include(p => p.User);
-            return View(await webProjectContext.ToListAsync());
+            var userIdStr = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                return RedirectToAction("Login", "Users");
+            }
+            int userId = int.Parse(userIdStr);
+
+            bool isAdmin = User.IsInRole("admin");
+
+            IQueryable<Post> query = _context.Posts
+            .Include(p => p.Category)
+            .Include(p => p.User);
+
+            if (!isAdmin)
+            {
+                query = query.Where(p => p.UserId == userId);
+            }
+
+            var posts = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
+            return View(posts);
         }
 
         // GET: Posts/Details/5

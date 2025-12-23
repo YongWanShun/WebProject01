@@ -31,12 +31,22 @@
                     管理區
                 </div>
                 <div class="card-body">
-                    <a href="/Admin/Posts" class="btn btn-sm btn-outline-danger w-100 mb-2">
-                        管理文章 / 刪文
-                    </a>
-                    <a href="/Admin/Categories" class="btn btn-sm btn-outline-secondary w-100">
-                        管理分類
-                    </a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a href="/Posts/Index" class="btn btn-sm btn-outline-danger w-100 mb-2">
+                            管理文章 / 刪文
+                        </a>
+                        @if (User.IsInRole("admin"))
+                        {
+                            <a href="/Categories/Index" class="btn btn-sm btn-outline-secondary w-100">
+                                管理分類
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <p class="small text-muted mb-0">請先登入才能使用管理功能</p>
+                    }
                 </div>
             </div>
         </aside>
