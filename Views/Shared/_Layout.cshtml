@@ -27,9 +27,19 @@
                         </li> *@
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="Index">我的文章</a>
-                            </li>
+                            @if (User.IsInRole("admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="Index">所有文章</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="Index">我的文章</a>
+                                </li>
+                            }
+                            
                         }
                         else
                         {
@@ -41,10 +51,14 @@
                         @if (User.IsInRole("admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Categories" asp-action="Index">分類</a>
+                                <a class="nav-link text-danger fw-bold" asp-area="" asp-controller="Categories" asp-action="Index">
+                                    <i class="bi bi-gear-fill"></i>分類
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Comments" asp-action="Index">評論</a>
+                                <a class="nav-link text-danger fw-bold" asp-area="" asp-controller="Comments" asp-action="Index">
+                                    <i class="bi bi-gear-fill"></i>評論
+                                   </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-danger fw-bold" asp-controller="Users" asp-action="Index">
