@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -214,6 +215,27 @@ namespace WebProject.Controllers
         }
 
         public async Task<IActionResult> ToggleActive(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // 切換狀態：如果是 true 變 false，如果是 false 變 true
+            // 注意：因為 IsActive 是 bool? (Nullable)，我們用 GetGetValueOrDefault() 來處理
+            bool currentStatus = user.IsActive.GetValueOrDefault(true);
+            user.IsActive = !currentStatus;
+
+            await _context.SaveChangesAsync();
+
+            // 切換完後，導回列表頁
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> DisableUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
