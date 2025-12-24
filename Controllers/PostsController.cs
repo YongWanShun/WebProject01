@@ -190,46 +190,105 @@ namespace WebProject.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", post.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", post.UserId);
+
+            // 權限檢查 (防止惡意訪問)
+            var currentUserIdStr = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(currentUserIdStr)) return RedirectToAction("Login", "Users");
+            int currentUserId = int.Parse(currentUserIdStr);
+
+            // 如果不是作者本人 且 不是管理員 -> 禁止編輯
+            if (post.UserId != currentUserId && !User.IsInRole("admin"))
+            {
+                return Content("<script>alert('你沒有權限編輯這篇文章！'); window.history.back();</script>", "text/html; charset=utf-8");
+            }
+
+            // 載入分類列表
+            var categories = _context.Categories.ToList();
+            ViewBag.CategoryId = new SelectList(categories, "CategoryId", "Name", post.CategoryId);
+            
             return View(post);
         }
 
         // POST: Posts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PostId,Title,Content,UserId,CategoryId,CreatedAt,UpdatedAt,ViewCount,IsDeleted,ThumbnailUrl")] Post post)
+        // 移除原本的 [Bind] 屬性，直接接收 Post 模型
+        public async Task<IActionResult> Edit(int id, Post model)
         {
-            if (id != post.PostId)
+            if (id != model.PostId)
             {
                 return NotFound();
             }
+
+            // 1. 從資料庫撈出「原本的舊文章」 (包含作者資料，用於權限檢查)
+            var existingPost = await _context.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.PostId == id);
+            if (existingPost == null) return NotFound();
+
+            // 2. 權限檢查 (防止惡意修改)
+            // 取得目前登入者 ID
+            var currentUserIdStr = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(currentUserIdStr)) return RedirectToAction("Login", "Users");
+            int currentUserId = int.Parse(currentUserIdStr);
+
+            // 如果不是作者本人 且 不是管理員 -> 禁止修改
+            if (existingPost.UserId != currentUserId && !User.IsInRole("admin"))
+            {
+                return Content("<script>alert('你沒有權限編輯這篇文章！'); window.history.back();</script>", "text/html; charset=utf-8");
+            }
+
+            // 3. ★ 關鍵：移除不需要驗證的欄位
+            // 因為表單沒有傳 User 和 Category 物件回來，不移除會導致 IsValid 永遠是 false
+            ModelState.Remove("User");
+            ModelState.Remove("Category");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(post);
+                    // 4. 更新欄位 (重新抓取一個追蹤的實體來更新，或者手動賦值)
+                    // 這裡我們把資料庫原本的實體抓出來更新
+                    var postToUpdate = await _context.Posts.FindAsync(id);
+
+                    postToUpdate.Title = model.Title;
+                    postToUpdate.Content = model.Content;
+                    postToUpdate.CategoryId = model.CategoryId;
+                    postToUpdate.UpdatedAt = DateTime.Now; // 更新時間
+
+                    // 5. 處理圖片更新
+                    if (model.Thumbnail != null && model.Thumbnail.Length > 0)
+                    {
+                        // 儲存新圖片
+                        string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
+                        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                        string fileExt = Path.GetExtension(model.Thumbnail.FileName);
+                        string fileName = Guid.NewGuid().ToString() + fileExt;
+                        string filePath = Path.Combine(uploadsFolder, fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.Thumbnail.CopyToAsync(stream);
+                        }
+
+                        // 更新資料庫欄位
+                        postToUpdate.ThumbnailUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+                    }
+                    // 如果沒上傳新圖片，postToUpdate.ThumbnailUrl 會保持原本的值
+
+                    _context.Update(postToUpdate);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostExists(post.PostId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!PostExists(model.PostId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", post.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", post.UserId);
-            return View(post);
+
+            // 驗證失敗，重新載入下拉選單
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", model.CategoryId);
+            return View(model);
         }
 
         // GET: Posts/Delete/5
