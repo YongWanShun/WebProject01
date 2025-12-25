@@ -17,7 +17,7 @@ namespace WebProject
             {
                 options.LoginPath = "/Users/Login";       // 沒登入時，導向登入頁 (雖然我們用彈窗，但這是保險)
                 options.AccessDeniedPath = "/Home/Index"; // 【權限不足】時 (例如一般人想進後台)，踢回首頁
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5); // 登入狀態保持 7 天
+                options.ExpireTimeSpan = TimeSpan.FromDays(1); // 登入狀態保持  天
             });
 
             var app = builder.Build();
